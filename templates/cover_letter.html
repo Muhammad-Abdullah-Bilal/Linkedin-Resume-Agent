@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cover Letter</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin: 0;
+            padding: 50px;
+            font-size: 13px;
+            background: #ffffff;
+            text-align: justify;
+        }
+        .letterhead {
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        .letterhead h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #2980b9;
+            font-weight: 700;
+        }
+        .letterhead .contact {
+            font-size: 11.5px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .date {
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .recipient {
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        .recipient strong {
+            color: #2c3e50;
+        }
+        .body-text p {
+            margin-bottom: 16px;
+            text-indent: 0;
+        }
+        .signoff {
+            margin-top: 30px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="letterhead">
+        <h1>{{ name }}</h1>
+        <div class="contact">
+            {{ contact_details }}
+        </div>
+    </div>
+
+    <div class="date">
+        {{ date }}
+    </div>
+
+    <div class="recipient">
+        <strong>Hiring Manager / Recruitment Team</strong><br>
+        {{ company }}<br>
+        London, UK
+    </div>
+
+    <div class="body-text">
+        {{ paragraphs_html | safe }}
+    </div>
+
+    <div class="signoff">
+        Sincerely,<br><br><br>
+        <strong>{{ name }}</strong>
+    </div>
+</body>
+</html>

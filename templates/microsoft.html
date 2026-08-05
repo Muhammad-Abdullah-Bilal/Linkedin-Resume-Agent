@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }} - Resume (Microsoft Style)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333333;
+            line-height: 1.45;
+            margin: 0;
+            padding: 40px;
+            font-size: 13px;
+            background: #ffffff;
+        }
+        .header {
+            margin-bottom: 25px;
+            border-left: 4px solid #0078d4;
+            padding-left: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            color: #0078d4;
+        }
+        .header h2 {
+            margin: 3px 0 6px 0;
+            font-size: 14px;
+            color: #444444;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .contact-info {
+            font-size: 11px;
+            color: #666666;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #0078d4;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e1dfdd;
+            padding-bottom: 2px;
+            margin-bottom: 8px;
+        }
+        .summary {
+            text-align: justify;
+        }
+        .skills-grid {
+            margin-top: 5px;
+        }
+        .skills-row {
+            margin-bottom: 5px;
+        }
+        .skills-row strong {
+            color: #333333;
+        }
+        .item {
+            margin-bottom: 10px;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .item-duration {
+            font-weight: normal;
+            color: #666666;
+        }
+        ul {
+            margin: 3px 0 0 0;
+            padding-left: 18px;
+        }
+        li {
+            margin-bottom: 3px;
+            text-align: justify;
+        }
+        .techs-used {
+            margin-top: 3px;
+            font-size: 11px;
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ name }}</h1>
+        <h2>{{ title }}</h2>
+        <div class="contact-info">
+            {{ contact.location }} &nbsp;&bull;&nbsp; {{ contact.phone }} &nbsp;&bull;&nbsp; {{ contact.email }}
+            {% if contact.linkedin %}&nbsp;&bull;&nbsp; {{ contact.linkedin }}{% endif %}
+            {% if contact.github %}&nbsp;&bull;&nbsp; {{ contact.github }}{% endif %}
+        </div>
+    </div>
+
+    {% if summary %}
+    <div class="section">
+        <div class="section-title">Professional Summary</div>
+        <div class="summary">{{ summary }}</div>
+    </div>
+    {% endif %}
+
+    {% if skills %}
+    <div class="section">
+        <div class="section-title">Technical Skills</div>
+        <div class="skills-grid">
+            {% for cat, list in skills.items() %}
+            <div class="skills-row">
+                <strong>{{ cat }}:</strong> {{ list | join(', ') }}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if experience %}
+    <div class="section">
+        <div class="section-title">Work History</div>
+        {% for exp in experience %}
+        <div class="item">
+            <div class="item-header">
+                <span>{{ exp.role }} at {{ exp.company }}</span>
+                <span class="item-duration">{{ exp.duration }}</span>
+            </div>
+            <ul>
+                {% for bullet in exp.bullets %}
+                <li>{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if projects %}
+    <div class="section">
+        <div class="section-title">Technical Projects</div>
+        {% for proj in projects %}
+        <div class="item">
+            <div class="item-header">
+                <span>{{ proj.name }}</span>
+            </div>
+            <ul>
+                {% for bullet in proj.bullets %}
+                <li>{{ bullet }}</li>
+                {% endfor %}
+            </ul>
+            {% if proj.technologies %}
+            <div class="techs-used">
+                <strong>Technologies:</strong> {{ proj.technologies | join(', ') }}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if education %}
+    <div class="section">
+        <div class="section-title">Education</div>
+        {% for edu in education %}
+        <div class="item">
+            <div class="item-header">
+                <span>{{ edu.degree }}</span>
+                <span class="item-duration">{{ edu.duration }}</span>
+            </div>
+            <div style="color: #666666;">{{ edu.institution }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if certifications %}
+    <div class="section">
+        <div class="section-title">Certifications</div>
+        <ul>
+            {% for cert in certifications %}
+            <li>{{ cert }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</body>
+</html>

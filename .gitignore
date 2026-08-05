@@ -1,0 +1,24 @@
+# Environment variables and API keys
+.env
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local uploads and databases
+AI-ML resume.pdf
+linkedin_ai_engineer_jobs.json
+
+# Local output tailoring directory
+outputs/
+
+# Temporary scratch folder
+scratch/
+
+# IDE configurations
+.vscode/
+.idea/
+*.swp
+*.swo

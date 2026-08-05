@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn AI Resume Agent — Premium Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-wand-magic-sparkles brand-logo"></i>
+                <span class="brand-name">ResumeAgent</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="jobs">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Job Search</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="upload">
+                    <i class="fa-solid fa-file-arrow-up"></i>
+                    <span>Upload Resume</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="analysis">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span>ATS Analysis</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="preview">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Live Preview</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="downloads">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Center</span>
+                </a>
+                <a href="#" class="nav-item" data-tab="chat">
+                    <i class="fa-solid fa-comments"></i>
+                    <span>AI Career Agent</span>
+                </a>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="avatar">MA</div>
+                <div class="user-info">
+                    <span class="name">M. Abdullah Bilal</span>
+                    <span class="role">AI/ML Engineer</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="app-header">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p id="page-subtitle">Manage your resume tailoring and ATS match metrics</p>
+                </div>
+                <div class="header-actions">
+                    <div class="active-job-indicator" id="active-job-badge" style="display: none;">
+                        <i class="fa-solid fa-circle-dot status-pulse"></i>
+                        <span id="active-job-text">Active Job: None</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content Panels -->
+            <div class="content-body">
+                
+                <!-- Tab 1: Dashboard Overview -->
+                <section class="tab-panel active" id="tab-dashboard">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Parsed Resume</span>
+                                <i class="fa-solid fa-circle-check text-success"></i>
+                            </div>
+                            <div class="stat-value" id="stats-resume-status">Active</div>
+                            <div class="stat-desc">AI-ML resume.pdf loaded</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">LinkedIn Jobs Scraped</span>
+                                <i class="fa-solid fa-cloud-arrow-down text-info"></i>
+                            </div>
+                            <div class="stat-value" id="stats-jobs-count">10</div>
+                            <div class="stat-desc">Posted ≤ 3 weeks ago</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Best Match Score</span>
+                                <i class="fa-solid fa-star text-warning"></i>
+                            </div>
+                            <div class="stat-value" id="stats-best-score">9.0/10</div>
+                            <div class="stat-desc">Graduate AI Engineer at Abound</div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-header">
+                            <h2>Recommended AI/ML Positions</h2>
+                            <button class="btn btn-outline btn-sm" onclick="switchTab('jobs')">View All</button>
+                        </div>
+                        <div class="job-list-compact" id="dashboard-job-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 2: Job Search & Selection -->
+                <section class="tab-panel" id="tab-jobs">
+                    <div class="job-search-layout">
+                        <div class="job-sidebar-list" id="job-search-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="job-details-view" id="job-details-pane">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-briefcase empty-icon"></i>
+                                <h3>Select a job listing to view description and start tailoring</h3>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 3: Upload Resume -->
+                <section class="tab-panel" id="tab-upload">
+                    <div class="upload-container">
+                        <div class="upload-dropzone">
+                            <i class="fa-solid fa-file-arrow-up upload-icon"></i>
+                            <h3>Upload Candidate Resume</h3>
+                            <p class="upload-desc">Select a new PDF CV to replace the default AI-ML resume.pdf file.</p>
+                            <input type="file" id="cv-file-input" accept=".pdf" style="display: none;">
+                            <button class="btn btn-outline" onclick="document.getElementById('cv-file-input').click()">
+                                <i class="fa-solid fa-folder-open"></i> Browse PDF
+                            </button>
+                            <div id="upload-status" style="margin-top: 15px; font-size:12.5px; font-weight:500;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 4: ATS Analysis -->
+                <section class="tab-panel" id="tab-analysis">
+                    <div class="analysis-grid" id="analysis-container">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-gauge-high empty-icon"></i>
+                            <h3>No Job Selected</h3>
+                            <p>Please select a position from the Job Search tab first to view compatibility metrics.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 5: Live Preview -->
+                <section class="tab-panel" id="tab-preview">
+                    <div class="preview-layout">
+                        <!-- Template Controls -->
+                        <div class="preview-sidebar">
+                            <h3>Resume Templates</h3>
+                            <div class="template-selector">
+                                <div class="template-card active" data-template="modern">
+                                    <div class="template-thumb thumb-modern"></div>
+                                    <span>Modern Blue</span>
+                                </div>
+                                <div class="template-card" data-template="google">
+                                    <div class="template-thumb thumb-google"></div>
+                                    <span>Google Classic</span>
+                                </div>
+                                <div class="template-card" data-template="microsoft">
+                                    <div class="template-thumb thumb-microsoft"></div>
+                                    <span>Microsoft Corporate</span>
+                                </div>
+                                <div class="template-card" data-template="minimal">
+                                    <div class="template-thumb thumb-minimal"></div>
+                                    <span>Minimalist Clean</span>
+                                </div>
+                            </div>
+
+                            <h3 style="margin-top: 25px;">Export & Options</h3>
+                            <button class="btn btn-primary btn-block" onclick="triggerTailoring()" id="btn-tailor-cv">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Tailor CV
+                            </button>
+                            <button class="btn btn-outline btn-block" onclick="printPreviewFrame()" style="margin-top: 10px;">
+                                <i class="fa-solid fa-print"></i> Print Resume
+                            </button>
+                        </div>
+
+                        <!-- Live Render Panel -->
+                        <div class="preview-render-pane">
+                            <div class="preview-header-bar">
+                                <div class="preview-tabs">
+                                    <button class="preview-tab active" onclick="switchPreviewDoc('cv')">Curriculum Vitae (CV)</button>
+                                    <button class="preview-tab" onclick="switchPreviewDoc('letter')">Cover Letter</button>
+                                </div>
+                                <div class="preview-zoom-controls">
+                                    <button class="zoom-btn" id="zoom-out"><i class="fa-solid fa-minus"></i></button>
+                                    <span id="zoom-percent">100%</span>
+                                    <button class="zoom-btn" id="zoom-in"><i class="fa-solid fa-plus"></i></button>
+                                </div>
+                            </div>
+                            <div class="preview-iframe-wrapper">
+                                <iframe id="preview-frame" src="/api/preview?template=modern"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab 6: Downloads -->
+                <section class="tab-panel" id="tab-downloads">
+                    <div class="download-layout">
+                        <div class="download-card">
+                            <div class="icon-wrapper pdf"><i class="fa-solid fa-file-pdf"></i></div>
+                            <h3>ATS-Optimized CV (PDF)</h3>
+                            <p>Recruiter-ready PDF formatting with Helvetica fonts, dividers, and bullet points.</p>
+                            <a href="#" class="btn btn-primary" id="dl-cv-pdf" onclick="handleFileDownload('pdf')">
+                                <i class="fa-solid fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                        <div class="download-card">
+                            <div class="icon-wrapper word"><i class="fa-solid fa-file-word"></i></div>
+                            <h3>Editable Resume (Word)</h3>
+                            <p>Standard OpenXML DOCX layout for customized corrections and offline backups.</p>
+                            <a href="#" class="btn btn-outline" id="dl-cv-docx" onclick="handleFileDownload('docx')">
+                                <i class="fa-solid fa-download"></i> Download Word
+                            </a>
+                        </div>
+                        <div class="download-card">
+                            <div class="icon-wrapper letter"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <h3>Custom Cover Letter</h3>
+                            <p>Compelling customized application letter addressing target company and team goals.</p>
+                            <div style="display:flex; gap:10px; margin-top:20px; justify-content:center;">
+                                <a href="#" class="btn btn-outline btn-sm" onclick="handleFileDownload('letter_pdf')">PDF Letter</a>
+                                <a href="#" class="btn btn-outline btn-sm" onclick="handleFileDownload('letter_docx')">Word Letter</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Tab 7: AI Career Agent Chat -->
+                <section class="tab-panel" id="tab-chat">
+                    <div class="chat-layout">
+                        <div class="chat-messages" id="chat-messages-container">
+                            <div class="chat-message agent">
+                                <div class="message-avatar">AI</div>
+                                <div class="message-bubble">
+                                    Hi Muhammad Abdullah Bilal! I am your AI Career Agent. You can chat with me, ask for resume feedback, or tell me to search for specific roles on LinkedIn (e.g., <em>"Find Python Developer roles in Manchester"</em>).
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input-bar">
+                            <input type="text" id="chat-input-field" placeholder="Ask me anything, or type a job search request...">
+                            <button class="btn btn-primary" id="btn-chat-send" onclick="sendChatMessage()">
+                                <i class="fa-solid fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+    <script src="/app.js"></script>
+</body>
+</html>
