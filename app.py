@@ -59,3 +59,6 @@ async def proxy_backend(request: Request, path: str = ""):
             status_code=resp.status_code,
             headers=dict(resp.headers)
         )
+
+# 5. Launch the Gradio web server in blocking mode
+demo.launch(server_name="0.0.0.0", server_port=7860)
