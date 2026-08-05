@@ -2,10 +2,10 @@ import os
 import threading
 import time
 import httpx
-import uvicorn
-from fastapi import FastAPI, Request
+import gradio as gr
+from fastapi import Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
+from fastapi.responses import StreamingResponse, HTMLResponse
 
 # 1. Start our standard python server on port 8000 in a background thread
 def start_backend():
@@ -16,30 +16,20 @@ def start_backend():
 backend_thread = threading.Thread(target=start_backend, daemon=True)
 backend_thread.start()
 
-# Wait for backend
+# Wait for backend to start
 time.sleep(2)
 
-# 2. Create FastAPI app
-app = FastAPI()
+# 2. Define Gradio Interface (serves the iframe)
+with gr.Blocks(title="Linkedin Resume Agent") as demo:
+    gr.HTML("<iframe src='/dashboard/index.html' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
 
-# 3. Mount static files directory at /dashboard
+# 3. Get Gradio's internal FastAPI app
+app = demo.app
+
+# 4. Mount static files directory directly on Gradio's FastAPI app
 app.mount("/dashboard", StaticFiles(directory="static"), name="dashboard")
 
-# 4. Route root '/' to serve index.html directly
-@app.get("/")
-def read_root():
-    return FileResponse("static/index.html")
-
-# 5. Route /styles.css and /app.js to serve directly from static folder
-@app.get("/styles.css")
-def get_css():
-    return FileResponse("static/styles.css")
-
-@app.get("/app.js")
-def get_js():
-    return FileResponse("static/app.js")
-
-# 6. Proxy API requests to backend http.server on port 8000
+# 5. Route API requests to backend http.server on port 8000
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_api(request: Request, path: str = ""):
     try:
@@ -75,8 +65,6 @@ async def proxy_api(request: Request, path: str = ""):
         print(f"[Proxy Exception] Failed to proxy API {request.method} /api/{path}: {proxy_err}")
         return HTMLResponse(content=f"API Proxy error: {proxy_err}", status_code=500)
 
-# 7. Start Uvicorn directly
+# 6. Launch the Gradio web server natively (so the Hugging Face supervisor detects it and keeps it alive)
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    print(f"Booting Uvicorn Server on port {port}...")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
