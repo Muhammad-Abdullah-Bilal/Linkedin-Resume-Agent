@@ -69,7 +69,7 @@ with gr.Blocks(title="Linkedin Resume Agent") as demo:
     gr.HTML("<iframe src='/dashboard/index.html' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
 
 # 6. Mount Gradio to FastAPI root
-app = gr.mount_wsgi_app(app, demo, path="/")
+app = gr.mount_gradio_app(app, demo, path="/")
 
 # 7. Boot using Uvicorn
 if __name__ == "__main__":
