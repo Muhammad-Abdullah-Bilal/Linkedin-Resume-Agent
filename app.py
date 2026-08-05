@@ -26,39 +26,55 @@ with gr.Blocks(title="Linkedin Resume Agent") as demo:
 # Get FastAPI app from Gradio
 app = demo.app
 
+from fastapi.responses import StreamingResponse, HTMLResponse
+
 @app.api_route("/dashboard/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_backend(request: Request, path: str = ""):
-    url_path = request.url.path
-    if url_path in ["/dashboard", "/dashboard/"]:
-        url_path = "/dashboard/index.html"
-        
-    target_path = url_path
-    if target_path.startswith("/dashboard/"):
-        target_path = "/" + target_path[len("/dashboard/"):]
-        
-    target_url = f"http://127.0.0.1:8000{target_path}"
-    if request.url.query:
-        target_url += f"?{request.url.query}"
-        
-    async with httpx.AsyncClient() as client:
-        req_headers = dict(request.headers)
-        req_headers.pop("host", None)
-        req_body = await request.body()
-        
-        resp = await client.request(
-            method=request.method,
-            url=target_url,
-            headers=req_headers,
-            content=req_body,
-            timeout=60.0
-        )
-        
-        return StreamingResponse(
-            resp.aiter_bytes(),
-            status_code=resp.status_code,
-            headers=dict(resp.headers)
-        )
+    try:
+        url_path = request.url.path
+        if url_path in ["/dashboard", "/dashboard/"]:
+            url_path = "/dashboard/index.html"
+            
+        target_path = url_path
+        if target_path.startswith("/dashboard/"):
+            target_path = "/" + target_path[len("/dashboard/"):]
+            
+        target_url = f"http://127.0.0.1:8000{target_path}"
+        if request.url.query:
+            target_url += f"?{request.url.query}"
+            
+        async with httpx.AsyncClient() as client:
+            # Clean headers to avoid proxy connection hangs
+            req_headers = {k.lower(): v for k, v in request.headers.items()}
+            for h in ["host", "content-length", "connection", "transfer-encoding", "accept-encoding"]:
+                req_headers.pop(h, None)
+                
+            req_body = await request.body()
+            
+            resp = await client.request(
+                method=request.method,
+                url=target_url,
+                headers=req_headers,
+                content=req_body,
+                timeout=60.0
+            )
+            
+            # Clean response headers
+            resp_headers = {k: v for k, v in resp.headers.items()}
+            resp_headers.pop("content-length", None)
+            resp_headers.pop("transfer-encoding", None)
+            
+            return StreamingResponse(
+                resp.aiter_bytes(),
+                status_code=resp.status_code,
+                headers=resp_headers
+            )
+    except Exception as proxy_err:
+        print(f"[Proxy Exception] Failed to proxy {request.method} {request.url.path}: {proxy_err}")
+        import traceback
+        traceback.print_exc()
+        return HTMLResponse(content=f"Proxy error occurred: {proxy_err}", status_code=500)
 
 # 5. Launch the Gradio web server in blocking mode
 demo.launch(server_name="0.0.0.0", server_port=7860)
