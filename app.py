@@ -2,7 +2,6 @@ import os
 import threading
 import time
 import httpx
-import uvicorn
 import gradio as gr
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -17,17 +16,20 @@ def start_backend():
 backend_thread = threading.Thread(target=start_backend, daemon=True)
 backend_thread.start()
 
-# Wait for backend to start up
+# Wait for backend to start
 time.sleep(2)
 
-# 2. Initialize FastAPI Application
-app = FastAPI()
+# 2. Define Gradio Interface (serves the iframe)
+with gr.Blocks(title="Linkedin Resume Agent") as demo:
+    gr.HTML("<iframe src='/dashboard/index.html' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
 
-# 3. Mount static files directory directly (no proxying for HTML/CSS/JS)
-# This serves static/index.html at /dashboard/index.html
+# 3. Get Gradio's internal FastAPI app
+app = demo.app
+
+# 4. Mount static files directory directly on Gradio's FastAPI app
 app.mount("/dashboard", StaticFiles(directory="static"), name="dashboard")
 
-# 4. Proxy API requests to backend http.server on port 8000
+# 5. Route API requests to backend http.server on port 8000
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
 async def proxy_api(request: Request, path: str = ""):
     try:
@@ -36,7 +38,6 @@ async def proxy_api(request: Request, path: str = ""):
             target_url += f"?{request.url.query}"
             
         async with httpx.AsyncClient() as client:
-            # Clean headers to prevent proxy connection hangs
             req_headers = {k.lower(): v for k, v in request.headers.items()}
             for h in ["host", "content-length", "connection", "transfer-encoding", "accept-encoding"]:
                 req_headers.pop(h, None)
@@ -64,15 +65,6 @@ async def proxy_api(request: Request, path: str = ""):
         print(f"[Proxy Exception] Failed to proxy API {request.method} /api/{path}: {proxy_err}")
         return HTMLResponse(content=f"API Proxy error: {proxy_err}", status_code=500)
 
-# 5. Define Gradio Interface (serves the iframe)
-with gr.Blocks(title="Linkedin Resume Agent") as demo:
-    gr.HTML("<iframe src='/dashboard/index.html' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
-
-# 6. Mount Gradio to FastAPI root
-app = gr.mount_gradio_app(app, demo, path="/")
-
-# 7. Boot using Uvicorn
+# 6. Launch the Gradio web server in blocking mode (letting Gradio handle port 7860 binding)
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    print(f"Booting Uvicorn Server on port {port}...")
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
