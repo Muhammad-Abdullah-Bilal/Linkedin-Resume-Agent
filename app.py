@@ -2,50 +2,41 @@ import os
 import threading
 import time
 import httpx
+import uvicorn
 import gradio as gr
 from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse
-from server import run_server
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import StreamingResponse, HTMLResponse
 
 # 1. Start our standard python server on port 8000 in a background thread
 def start_backend():
     print("Starting backend http.server on port 8000...")
+    from server import run_server
     run_server(8000)
 
 backend_thread = threading.Thread(target=start_backend, daemon=True)
 backend_thread.start()
 
-# Wait for backend
+# Wait for backend to start up
 time.sleep(2)
 
-# 2. Define custom routes and proxy on the FastAPI app
-# Gradio mounts the FastAPI app and exposes it under demo.app
-with gr.Blocks(title="Linkedin Resume Agent") as demo:
-    gr.HTML("<iframe src='/dashboard/' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
+# 2. Initialize FastAPI Application
+app = FastAPI()
 
-# Get FastAPI app from Gradio
-app = demo.app
+# 3. Mount static files directory directly (no proxying for HTML/CSS/JS)
+# This serves static/index.html at /dashboard/index.html
+app.mount("/dashboard", StaticFiles(directory="static"), name="dashboard")
 
-from fastapi.responses import StreamingResponse, HTMLResponse
-
-@app.api_route("/dashboard/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+# 4. Proxy API requests to backend http.server on port 8000
 @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def proxy_backend(request: Request, path: str = ""):
+async def proxy_api(request: Request, path: str = ""):
     try:
-        url_path = request.url.path
-        if url_path in ["/dashboard", "/dashboard/"]:
-            url_path = "/dashboard/index.html"
-            
-        target_path = url_path
-        if target_path.startswith("/dashboard/"):
-            target_path = "/" + target_path[len("/dashboard/"):]
-            
-        target_url = f"http://127.0.0.1:8000{target_path}"
+        target_url = f"http://127.0.0.1:8000/api/{path}"
         if request.url.query:
             target_url += f"?{request.url.query}"
             
         async with httpx.AsyncClient() as client:
-            # Clean headers to avoid proxy connection hangs
+            # Clean headers to prevent proxy connection hangs
             req_headers = {k.lower(): v for k, v in request.headers.items()}
             for h in ["host", "content-length", "connection", "transfer-encoding", "accept-encoding"]:
                 req_headers.pop(h, None)
@@ -60,7 +51,6 @@ async def proxy_backend(request: Request, path: str = ""):
                 timeout=60.0
             )
             
-            # Clean response headers
             resp_headers = {k: v for k, v in resp.headers.items()}
             resp_headers.pop("content-length", None)
             resp_headers.pop("transfer-encoding", None)
@@ -71,11 +61,18 @@ async def proxy_backend(request: Request, path: str = ""):
                 headers=resp_headers
             )
     except Exception as proxy_err:
-        print(f"[Proxy Exception] Failed to proxy {request.method} {request.url.path}: {proxy_err}")
-        import traceback
-        traceback.print_exc()
-        return HTMLResponse(content=f"Proxy error occurred: {proxy_err}", status_code=500)
+        print(f"[Proxy Exception] Failed to proxy API {request.method} /api/{path}: {proxy_err}")
+        return HTMLResponse(content=f"API Proxy error: {proxy_err}", status_code=500)
 
-# 5. Launch the Gradio web server in blocking mode
+# 5. Define Gradio Interface (serves the iframe)
+with gr.Blocks(title="Linkedin Resume Agent") as demo:
+    gr.HTML("<iframe src='/dashboard/index.html' style='width:100%; height:95vh; border:none; margin:0; padding:0;'></iframe>")
+
+# 6. Mount Gradio to FastAPI root
+app = gr.mount_wsgi_app(app, demo, path="/")
+
+# 7. Boot using Uvicorn
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    port = int(os.environ.get("PORT", 7860))
+    print(f"Booting Uvicorn Server on port {port}...")
+    uvicorn.run(app, host="0.0.0.0", port=port)

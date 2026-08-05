@@ -4,5 +4,7 @@ pdfminer.six
 python-docx
 httpx
 huggingface_hub==0.20.3
+uvicorn
+
 
 
