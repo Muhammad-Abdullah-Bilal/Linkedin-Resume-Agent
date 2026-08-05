@@ -3,5 +3,4 @@ jinja2
 pdfminer.six
 python-docx
 httpx
-gradio
 
