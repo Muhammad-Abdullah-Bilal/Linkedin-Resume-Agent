@@ -1,3 +1,14 @@
+---
+title: Linkedin Resume Agent
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.19.2
+app_file: app.py
+pinned: false
+---
+
 # 🤖 LinkedIn AI Resume Agent
 
 A production-grade, full-stack AI career assistant designed to search jobs on LinkedIn, audit your resume against target requirements, calculate ATS match scorecards, and dynamically generate tailored resumes and cover letters—all managed via a modern, glassmorphic dark-mode web dashboard.
